@@ -76,6 +76,10 @@ class Item:
     price: Optional[float] = None
     total_price: Optional[float] = None
     url: Optional[str] = None
+    # popolati da fetch_details()
+    description: Optional[str] = None
+    favourites: Optional[int] = None
+    seller_last_seen: Optional[str] = None
     extra: dict = field(default_factory=dict)
 
     def to_dict(self) -> dict:
@@ -209,3 +213,58 @@ class VintedScraper:
             finally:
                 browser.close()
         return list(results.values())
+
+    def fetch_details(self, items, verbose: bool = True):
+        """
+        Apre la pagina di ogni annuncio e ne arricchisce i dati con la
+        DESCRIZIONE (e alcuni dettagli: condizione precisa, n. preferiti,
+        ultimo accesso venditore).
+
+        ATTENZIONE: apre una pagina per annuncio -> molto piu' lento della
+        search. Usalo su un sottoinsieme gia' filtrato.
+
+        Accetta un singolo Item o una lista di Item; ritorna la lista arricchita.
+        """
+        single = isinstance(items, Item)
+        lst = [items] if single else list(items)
+        with sync_playwright() as p:
+            browser = p.chromium.launch(headless=self.headless, args=["--no-sandbox"])
+            ctx = browser.new_context(
+                locale=self.locale, user_agent=self.user_agent,
+                viewport={"width": 1366, "height": 900},
+            )
+            page = ctx.new_page()
+            try:
+                for i, it in enumerate(lst, 1):
+                    if not it.url:
+                        continue
+                    try:
+                        page.goto(it.url, wait_until="domcontentloaded", timeout=45000)
+                        page.wait_for_timeout(1200)
+                        it.description = self._safe_text(page, '[itemprop="description"]')
+                        # condizione precisa dalla pagina (piu' affidabile della card)
+                        status = self._safe_text(page, '[data-testid="item-attributes-status"]')
+                        if status:
+                            it.condition = status.replace("Condizioni", "").strip() or it.condition
+                        fav = self._safe_text(page, '[data-testid="favourite-button"]')
+                        if fav:
+                            m = re.search(r"\d+", fav)
+                            it.favourites = int(m.group()) if m else it.favourites
+                        it.seller_last_seen = self._safe_text(
+                            page, '[data-testid="seller-last-logged-in"]')
+                    except Exception as e:
+                        it.extra["detail_error"] = str(e)[:120]
+                    if verbose:
+                        print(f"  dettaglio {i}/{len(lst)}: {str(it.title)[:40]}",
+                              file=sys.stderr)
+                    time.sleep(self.pause + random.uniform(0, 0.8))  # rate limiting
+            finally:
+                browser.close()
+        return lst[0] if single else lst
+
+    @staticmethod
+    def _safe_text(page, selector: str) -> Optional[str]:
+        try:
+            return page.locator(selector).first.inner_text(timeout=1500).strip()
+        except Exception:
+            return None

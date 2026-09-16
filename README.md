@@ -84,8 +84,28 @@ Se installato come pacchetto, usa direttamente `ricerca-vinted "query" ...`.
 | `--catalog` | ID categoria o alias (`computer`) | nessuno |
 | `--pause` | secondi di pausa tra pagine (+ jitter) | `1.5` |
 | `--csv` | salva i dati grezzi in CSV | — |
+| `--dettagli` | apre le pagine dei prodotti, legge la **descrizione** e stima la **qualità** | off |
+| `--top` | con `--dettagli`: quanti annunci (più economici) approfondire | `15` |
 | `--show` | mostra il browser (non headless) | headless |
 | `--locale` | locale del browser | `it-IT` |
+
+### Analisi qualità (titolo + descrizione)
+
+Con `--dettagli` lo scraper apre la pagina di ogni annuncio (fra i più economici,
+fino a `--top`), ne legge la **descrizione** e produce una stima di qualità:
+
+```bash
+python -m ricerca_vinted.cli "nas qnap" --catalog computer --dettagli --top 5
+```
+
+Per ogni annuncio stampa:
+- **punteggio 0-100** e verdetto (Ottimo / Buono / Discreto / Attenzione)
+- **segnali positivi/negativi** trovati (es. "perfettamente funzionante", "senza dischi", "72.000 ore")
+- **note del venditore** estratte: difetti dichiarati, accessori inclusi, ore d'uso,
+  garanzia, motivo di vendita
+
+L'analisi è a regole (keyword pesate, multilingua IT/FR/EN/ES), trasparente e senza
+dipendenze esterne. Vive in `ricerca_vinted/quality.py`.
 
 ## Uso — come libreria
 
@@ -99,8 +119,12 @@ items = scraper.search("nas synology", pages=2, catalog="2994")
 df = items_to_dataframe(items)
 print(summarize(df))
 
-for it in items[:5]:
-    print(it.id, it.title, it.price, it.url)
+# Arricchisci con la descrizione e stima la qualità
+from ricerca_vinted import analyze_item
+scraper.fetch_details(items[:10])            # apre le singole pagine
+for it in items[:10]:
+    rep = analyze_item(it)                   # analizza titolo + descrizione
+    print(it.title, "->", rep.verdict, rep.score, rep.seller_notes)
 ```
 
 ## Esempio: ricerca NAS
@@ -119,8 +143,9 @@ python examples/nas_finder.py --pages 2 --max-price 100
 ricerca_vinted/
 ├── ricerca_vinted/
 │   ├── __init__.py       # API pubblica
-│   ├── scraper.py        # VintedScraper, Item, parse_title
+│   ├── scraper.py        # VintedScraper (search, fetch_details), Item, parse_title
 │   ├── analysis.py       # items_to_dataframe, summarize
+│   ├── quality.py        # analisi qualità da titolo + descrizione
 │   └── cli.py            # interfaccia a riga di comando
 ├── examples/
 │   └── nas_finder.py     # esempio ricerca/filtro NAS
