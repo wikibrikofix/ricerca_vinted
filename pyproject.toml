@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ricerca-vinted"
+version = "1.0.0"
+description = "Scraper del catalogo Vinted basato su browser reale (Playwright)"
+readme = "README.md"
+requires-python = ">=3.8"
+license = { text = "MIT" }
+dependencies = [
+    "playwright>=1.48",
+    "pandas>=2.0",
+]
+
+[project.scripts]
+vinted-scraper = "vinted_scraper.cli:main"
+
+[tool.setuptools]
+packages = ["vinted_scraper"]
