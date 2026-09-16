@@ -18,11 +18,11 @@ import re
 import sys
 
 # Assicura che venga usato il package locale (evita conflitti con eventuali
-# pacchetti 'vinted_scraper' installati via pip).
+# pacchetti 'ricerca_vinted' installati via pip).
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from vinted_scraper import VintedScraper
-from vinted_scraper.analysis import items_to_dataframe
+from ricerca_vinted import VintedScraper
+from ricerca_vinted.analysis import items_to_dataframe
 
 # Marchi/query da cercare (categoria Elettronica>Computer = 2994)
 QUERIES = ["nas synology", "nas qnap", "nas netgear", "asustor", "terramaster"]

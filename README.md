@@ -46,7 +46,7 @@ pip install -r requirements.txt
 playwright install chromium
 ```
 
-In alternativa, installazione come pacchetto (fornisce il comando `vinted-scraper`):
+In alternativa, installazione come pacchetto (fornisce il comando `ricerca-vinted`):
 
 ```bash
 pip install -e .
@@ -57,22 +57,22 @@ playwright install chromium
 
 ```bash
 # ricerca base (2 pagine)
-python -m vinted_scraper.cli "sneakers nike"
+python -m ricerca_vinted.cli "sneakers nike"
 
 # più pagine + esporta CSV
-python -m vinted_scraper.cli "nas synology" --pages 3 --csv risultati.csv
+python -m ricerca_vinted.cli "nas synology" --pages 3 --csv risultati.csv
 
 # filtra per categoria (alias 'computer' = Elettronica > Computer, id 2994)
-python -m vinted_scraper.cli "nas" --catalog computer --pages 2
+python -m ricerca_vinted.cli "nas" --catalog computer --pages 2
 
 # altro dominio Vinted
-python -m vinted_scraper.cli "veste" --base https://www.vinted.fr --locale fr-FR
+python -m ricerca_vinted.cli "veste" --base https://www.vinted.fr --locale fr-FR
 
 # mostra il browser (debug)
-python -m vinted_scraper.cli "drobo" --show
+python -m ricerca_vinted.cli "drobo" --show
 ```
 
-Se installato come pacchetto, usa direttamente `vinted-scraper "query" ...`.
+Se installato come pacchetto, usa direttamente `ricerca-vinted "query" ...`.
 
 ### Opzioni
 
@@ -90,8 +90,8 @@ Se installato come pacchetto, usa direttamente `vinted-scraper "query" ...`.
 ## Uso — come libreria
 
 ```python
-from vinted_scraper import VintedScraper
-from vinted_scraper.analysis import items_to_dataframe, summarize
+from ricerca_vinted import VintedScraper
+from ricerca_vinted.analysis import items_to_dataframe, summarize
 
 scraper = VintedScraper(base="https://www.vinted.it")
 items = scraper.search("nas synology", pages=2, catalog="2994")
@@ -117,7 +117,7 @@ python examples/nas_finder.py --pages 2 --max-price 100
 
 ```
 ricerca_vinted/
-├── vinted_scraper/
+├── ricerca_vinted/
 │   ├── __init__.py       # API pubblica
 │   ├── scraper.py        # VintedScraper, Item, parse_title
 │   ├── analysis.py       # items_to_dataframe, summarize
@@ -146,16 +146,15 @@ Il layout di Vinted può cambiare. Se l'estrazione si svuota:
    del dominio (es. per `.fr`: `Marque:`, `État:`, `Taille:`).
 2. Controlla che le card usino ancora `<a href="/items/...">` con attributo `title`.
 
-### Conflitto di nome con il pacchetto PyPI `vinted_scraper`
+### Nota sul nome del package
 
-Esiste su PyPI un pacchetto omonimo `vinted_scraper` (basato sull'API, non su
-Playwright). Se è installato nello stesso ambiente, può avere la precedenza
-sull'import. Per evitare ambiguità:
+Il package Python si chiama `ricerca_vinted` (non `vinted_scraper`) proprio per
+evitare conflitti con l'omonimo pacchetto PyPI `vinted_scraper` (basato sull'API,
+non su Playwright), che ha un'interfaccia diversa. Import corretto:
 
-- esegui gli script dalla **root del progetto**, oppure
-- installa questo progetto in un ambiente virtuale dedicato, oppure
-- nota che `examples/nas_finder.py` forza già l'uso del package locale
-  inserendo la root del progetto in testa a `sys.path`.
+```python
+from ricerca_vinted import VintedScraper
+```
 
 ## Note legali e uso responsabile
 

@@ -15,7 +15,7 @@ dependencies = [
 ]
 
 [project.scripts]
-vinted-scraper = "vinted_scraper.cli:main"
+ricerca-vinted = "ricerca_vinted.cli:main"
 
 [tool.setuptools]
-packages = ["vinted_scraper"]
+packages = ["ricerca_vinted"]
