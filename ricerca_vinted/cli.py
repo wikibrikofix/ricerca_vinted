@@ -25,6 +25,8 @@ def build_parser() -> argparse.ArgumentParser:
                          "(es. 'computer' = Elettronica>Computer, id 2994)")
     ap.add_argument("--pause", type=float, default=1.5,
                     help="secondi di pausa tra le pagine (default: 1.5, + jitter)")
+    ap.add_argument("--order",
+                    help="ordinamento risultati (es. 'newest_first' = più recenti)")
     ap.add_argument("--csv", help="salva i dati grezzi in un file CSV")
     ap.add_argument("--dettagli", action="store_true",
                     help="apre le pagine dei prodotti per leggere la DESCRIZIONE "
@@ -65,7 +67,7 @@ def main(argv=None) -> int:
         base=args.base, locale=args.locale,
         headless=not args.show, pause=args.pause,
     )
-    items = scraper.search(args.query, pages=args.pages, catalog=catalog)
+    items = scraper.search(args.query, pages=args.pages, catalog=catalog, order=args.order)
     df = items_to_dataframe(items)
 
     if args.csv and not df.empty:

@@ -83,6 +83,7 @@ Se installato come pacchetto, usa direttamente `ricerca-vinted "query" ...`.
 | `--pages` | numero di pagine da scorrere | `2` |
 | `--catalog` | ID categoria o alias (`computer`) | nessuno |
 | `--pause` | secondi di pausa tra pagine (+ jitter) | `1.5` |
+| `--order` | ordinamento (es. `newest_first` = più recenti) | default Vinted |
 | `--csv` | salva i dati grezzi in CSV | — |
 | `--dettagli` | apre le pagine dei prodotti, legge la **descrizione** e stima la **qualità** | off |
 | `--top` | con `--dettagli`: quanti annunci (più economici) approfondire | `15` |

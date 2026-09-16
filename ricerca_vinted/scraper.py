@@ -156,10 +156,12 @@ class VintedScraper:
         query: str,
         pages: int = 2,
         catalog: Optional[str] = None,
+        order: Optional[str] = None,
         verbose: bool = True,
     ) -> list[Item]:
         """Cerca annunci e restituisce una lista di Item deduplicati."""
         cat_q = f"&catalog[]={catalog}" if catalog else ""
+        order_q = f"&order={order}" if order else ""
         results: dict[str, Item] = {}
         with sync_playwright() as p:
             browser = p.chromium.launch(
@@ -174,7 +176,7 @@ class VintedScraper:
             try:
                 for pagina in range(1, pages + 1):
                     q = query.replace(" ", "%20")
-                    url = f"{self.base}/catalog?search_text={q}{cat_q}&page={pagina}"
+                    url = f"{self.base}/catalog?search_text={q}{cat_q}{order_q}&page={pagina}"
                     page.goto(url, wait_until="networkidle", timeout=60000)
                     page.wait_for_timeout(1500)
                     # scroll per innescare il lazy-load
